@@ -20,7 +20,20 @@ public class GutenbergIngestor {
             .followRedirects(HttpClient.Redirect.NORMAL)
             .build();
 
-    public static void downloadBook(int bookId, String baseOutputDir, String strategy) {
+    public static boolean downloadBook(int bookId, String baseOutputDir, String strategy) {
+        // Resolve the output directory based on the selected strategy
+        Path outputDir = resolveDatalakePath(Paths.get(baseOutputDir), bookId, strategy);
+
+        // Define the file paths using the required nomenclature
+        Path bodyPath = outputDir.resolve(bookId + ".body.txt");
+        Path headerPath = outputDir.resolve(bookId + ".header.txt");
+
+        // Check if files already exist to avoid duplicate network requests
+        if (Files.exists(bodyPath) && Files.exists(headerPath)) {
+            System.out.println("Skipping book " + bookId + ": Files already exist (Recovery Mode)");
+            return true;
+        }
+
         String url = String.format("https://www.gutenberg.org/cache/epub/%d/pg%d.txt", bookId, bookId);
 
         try {
@@ -34,15 +47,15 @@ public class GutenbergIngestor {
 
             if (response.statusCode() != 200) {
                 System.err.println("Error HTTP " + response.statusCode() + " for the book ID: " + bookId);
-                return;
+                return false;
             }
 
             String text = response.body();
 
             // Check if the Gutenberg markers exist in the text
             if (!text.contains(START_MARKER) || !text.contains(END_MARKER)) {
-                System.err.println("Book not founded: " + bookId);
-                return;
+                System.err.println("Book not found: " + bookId);
+                return false;
             }
 
             // Split text to extract header and body
@@ -52,23 +65,20 @@ public class GutenbergIngestor {
             String[] parts2 = parts1[1].split(java.util.regex.Pattern.quote(END_MARKER), 2);
             String body = parts2[0];
 
-            // Resolve the output directory based on the selected strategy
-            Path outputDir = resolveDatalakePath(Paths.get(baseOutputDir), bookId, strategy);
+            // Create directories if they do not exist
             Files.createDirectories(outputDir);
-
-            // Define the file paths using the required nomenclature
-            Path bodyPath = outputDir.resolve(bookId + ".body.txt");
-            Path headerPath = outputDir.resolve(bookId + ".header.txt");
 
             // Write the extracted text into the files
             Files.writeString(bodyPath, body.strip());
             Files.writeString(headerPath, header.strip());
 
             System.out.println("Book " + bookId + " saved using [" + strategy + "]");
+            return true;
 
         } catch (IOException | InterruptedException e) {
             System.err.println("Network or disk error while processing the book " + bookId + ": " + e.getMessage());
             Thread.currentThread().interrupt();
+            return false;
         }
     }
 
@@ -84,7 +94,6 @@ public class GutenbergIngestor {
                 return baseDir.resolve("by_batch").resolve(batchName);
 
             case "by_time":
-                // Format date and time to match the required YYYYMMDD/HH/ structure
                 LocalDateTime now = LocalDateTime.now();
                 DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("yyyyMMdd");
                 DateTimeFormatter hourFmt = DateTimeFormatter.ofPattern("HH");
@@ -99,10 +108,33 @@ public class GutenbergIngestor {
         }
     }
 
-    public static void main() {
-        // TEST
-        downloadBook(1341, "data/datalake", "by_book");
-        downloadBook(1341, "data/datalake", "by_batch");
-        downloadBook(1341, "data/datalake", "by_time");
+    // --- BATCH DOWNLOAD FEATURE ---
+    public static void downloadBatch(int[] bookIds, String baseOutputDir, String strategy) {
+        System.out.println("=== STARTING BATCH DOWNLOAD ===");
+        int successCount = 0;
+
+        for (int bookId : bookIds) {
+            boolean success = downloadBook(bookId, baseOutputDir, strategy);
+            if (success) {
+                successCount++;
+            }
+
+            //sleep for 200ms between requests
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.err.println("Batch interrupted.");
+                break;
+            }
+        }
+        System.out.println("=== BATCH COMPLETED: " + successCount + "/" + bookIds.length + " SUCCESSFUL ===");
+    }
+
+    public static void main(String[] args) {
+        int[] sampleBooks = {1342, 84, 11, 2701, 1661};
+
+        System.out.println("--- Generating Sample Dataset ---");
+        downloadBatch(sampleBooks, "data/datalake", "by_time");
     }
 }
