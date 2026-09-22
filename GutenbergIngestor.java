@@ -37,7 +37,6 @@ public class GutenbergIngestor {
         String url = String.format("https://www.gutenberg.org/cache/epub/%d/pg%d.txt", bookId, bookId);
 
         try {
-            // Build and send the HTTP GET request
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
@@ -133,8 +132,13 @@ public class GutenbergIngestor {
 
     public static void main(String[] args) {
         int[] sampleBooks = {1342, 84, 11, 2701, 1661};
+        String[] strategies = {"by_book", "by_time", "by_batch"};
 
         System.out.println("--- Generating Sample Dataset ---");
-        downloadBatch(sampleBooks, "data/datalake", "by_time");
+
+        for (String strategy : strategies) {
+            System.out.println("\n-> Executing strategy: " + strategy);
+            downloadBatch(sampleBooks, "data/datalake", strategy);
+        }
     }
 }
