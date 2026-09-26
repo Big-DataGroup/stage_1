@@ -1,0 +1,9 @@
+# Archivos del sistema e IDE
+.idea/
+*.iml
+target/
+
+# Base de datos y archivos de prueba locales
+*.db
+*.txt
+!README.md
