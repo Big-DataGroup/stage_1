@@ -1,5 +1,6 @@
 package org.ulpgc.bigdata.datamarts;
 
+import org.ulpgc.bigdata.datamarts.storage.IndexStorage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,12 @@ public class InvertedIndex {
     public void printIndex() {
         for (Map.Entry<String, List<Integer>> entry : index.entrySet()) {
             System.out.println(entry.getKey() + " -> " + entry.getValue());
+        }
+    }
+
+    public void persistAll(List<IndexStorage> storages) {
+        for (IndexStorage storage : storages) {
+            storage.save(this.index);
         }
     }
 }

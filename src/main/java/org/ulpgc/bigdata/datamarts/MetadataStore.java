@@ -27,7 +27,7 @@ public class MetadataStore {
     }
 
     public static void insertMetadata(BookMetadata book) {
-        String insertSQL = "INSERT INTO books(book_id, title, author, language) VALUES(?,?,?,?)";
+        String insertSQL = "INSERT OR REPLACE INTO books(book_id, title, author, language) VALUES(?,?,?,?)";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
