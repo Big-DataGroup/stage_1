@@ -21,5 +21,14 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.42.0.0</version>
         </dependency>
+
+        <!-- Driver de MongoDB para persistir el índice invertido (MongoIndexStorage) -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+    </dependencies>
+</project>
     </dependencies>
 </project>
