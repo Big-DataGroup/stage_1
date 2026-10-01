@@ -60,8 +60,8 @@ public class Main {
         // 5. FASE DE EXPORTACIÓN (Persona 3)
         System.out.println("\n=== FASE 3: PERSISTENCIA DEL ÍNDICE ===");
         List<IndexStorage> storages = List.of(
-                new JsonFileIndexStorage("../../data/index/monolithic/index.json"),
-                new FolderHierarchyIndexStorage("../../data/index/hierarchy"),
+                new JsonFileIndexStorage("../../data/index/java/monolithic/index.json"),
+                new FolderHierarchyIndexStorage("../../data/index/java/hierarchy"),
                 new MongoIndexStorage("mongodb://localhost:27017", "gutenberg", "inverted_index")
         );
 
