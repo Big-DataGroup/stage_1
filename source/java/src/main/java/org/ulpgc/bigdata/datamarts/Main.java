@@ -9,8 +9,8 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         // 1. Configuración
-        String datalakeDir = "data/datalake";
-        String controlDir = "data/control";
+        String datalakeDir = "../../data/datalake";
+        String controlDir = "../../data/control";
         int[] sampleBooks = {1342, 84, 11, 2701, 1661};
 
         // 2. Inicializar Control y Metadatos
@@ -60,8 +60,8 @@ public class Main {
         // 5. FASE DE EXPORTACIÓN (Persona 3)
         System.out.println("\n=== FASE 3: PERSISTENCIA DEL ÍNDICE ===");
         List<IndexStorage> storages = List.of(
-                new JsonFileIndexStorage("data/index/monolithic/index.json"),
-                new FolderHierarchyIndexStorage("data/index/hierarchy"),
+                new JsonFileIndexStorage("../../data/index/monolithic/index.json"),
+                new FolderHierarchyIndexStorage("../../data/index/hierarchy"),
                 new MongoIndexStorage("mongodb://localhost:27017", "gutenberg", "inverted_index")
         );
 
