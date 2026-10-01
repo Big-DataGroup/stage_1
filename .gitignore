@@ -7,3 +7,12 @@ target/
 *.db
 *.txt
 !README.md
+
+# Ignorar todo el contenido de datos y bases de datos
+data/datalake/*
+data/control/*
+data/index/*
+data/*.db
+
+# Mantener los archivos .gitkeep para subir las carpetas vacías
+!data/**/.gitkeep
