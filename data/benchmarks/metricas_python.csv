@@ -1,0 +1,7 @@
+Benchmark,datasetSize,Ops/s,RAM_MB
+updatePerformance,500,6.53,0.0559
+queryPerformance,500,142857.09,0.0001
+diskIoPerformance,500,222222.15,0.0001
+updatePerformance,1000,3.34,0.0555
+queryPerformance,1000,131578.95,0.0001
+diskIoPerformance,1000,196078.48,0.0001
