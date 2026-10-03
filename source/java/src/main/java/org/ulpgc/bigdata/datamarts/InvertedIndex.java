@@ -24,7 +24,7 @@ public class InvertedIndex {
             // Añade el ID del libro a la lista de esa palabra
             index.get(word).add(bookId);
         }
-        System.out.println("Libro " + bookId + " indexado en memoria correctamente.");
+        //System.out.println("Libro " + bookId + " indexado en memoria correctamente.");
     }
 
     // Metodo temporal para ver el contenido en la consola
@@ -38,5 +38,10 @@ public class InvertedIndex {
         for (IndexStorage storage : storages) {
             storage.save(this.index);
         }
+    }
+
+    // Devuelve los libros donde aparece la palabra, o una lista vacía si no existe
+    public List<Integer> search(String word) {
+        return index.getOrDefault(word, new ArrayList<>());
     }
 }
