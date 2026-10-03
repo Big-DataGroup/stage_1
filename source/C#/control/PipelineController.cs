@@ -5,10 +5,6 @@ using System.Linq;
 
 namespace BigDataPipeline.Control
 {
-    /// <summary>
-    /// Capa de control del pipeline.
-    /// Supervisa qué libros han sido descargados y cuáles ya han sido indexados.
-    /// </summary>
     public class PipelineController
     {
         private readonly string _downloadedFile;
@@ -16,8 +12,6 @@ namespace BigDataPipeline.Control
 
         private readonly HashSet<int> _downloadedBooks;
         private readonly HashSet<int> _indexedBooks;
-        
-        // C# utiliza un objeto de bloqueo explícito en lugar de la palabra 'synchronized'
         private readonly object _lockObject = new object();
 
         public PipelineController(string downloadedFilePath, string indexedFilePath)
@@ -40,7 +34,6 @@ namespace BigDataPipeline.Control
 
             try
             {
-                // Equivalente directo a Files.readAllLines(file)
                 string[] lines = File.ReadAllLines(filePath);
                 foreach (string line in lines)
                 {
@@ -61,7 +54,6 @@ namespace BigDataPipeline.Control
 
         public void MarkDownloaded(int bookId)
         {
-            // Bloque lock equivale a un método 'synchronized' de Java
             lock (_lockObject)
             {
                 if (_downloadedBooks.Add(bookId))
@@ -94,14 +86,12 @@ namespace BigDataPipeline.Control
 
         public List<int> GetBooksPendingIndexing()
         {
-            // Traducción de Stream.filter.sorted.collect a LINQ de C#
             return _downloadedBooks
                 .Where(id => !_indexedBooks.Contains(id))
                 .OrderBy(id => id)
                 .ToList();
         }
 
-        // IReadOnlySet sustituye a Set.copyOf() para asegurar la inmutabilidad[cite: 25]
         public IReadOnlySet<int> GetDownloadedBooks()
         {
             return _downloadedBooks;
@@ -122,8 +112,6 @@ namespace BigDataPipeline.Control
                     Directory.CreateDirectory(directory);
                 }
 
-                // AppendAllText abre, escribe y cierra el archivo automáticamente 
-                // Sustituye a Files.writeString con StandardOpenOption.APPEND[cite: 25]
                 File.AppendAllText(filePath, bookId + Environment.NewLine);
             }
             catch (Exception e)

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BigDataPipeline.Control;
-//using BigDataPipeline.Datalake;
 using BigDataPipeline.Datamarts;
 using BigDataPipeline.Datamarts.Storage;
 
@@ -10,7 +9,6 @@ namespace BigDataPipeline
 {
     class Program
     {
-        // En C# el Main debe ser 'async Task' si va a llamar a métodos await
         static async Task Main(string[] args)
         {
             string datalakeDir = "../../data/datalake";

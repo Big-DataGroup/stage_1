@@ -15,7 +15,6 @@ namespace BigDataPipeline.Datamarts.Storage
         public void Save(Dictionary<string, List<int>> index)
         {
             JsonIndexWriter.Write(index, _outputFile);
-            // Count sustituye a size() de Java[cite: 35]
             Console.WriteLine($"Índice monolítico JSON escrito en {_outputFile} ({index.Count} términos).");
         }
     }

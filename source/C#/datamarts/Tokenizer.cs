@@ -13,17 +13,15 @@ namespace BigDataPipeline.Datamarts
 
             try
             {
-                // Equivalente a BufferedReader y FileReader[cite: 32]
                 using StreamReader sr = new StreamReader(filePath);
                 string line;
                 
                 while ((line = sr.ReadLine()) != null)
                 {
-                    // Convertir a minúsculas y reemplazar usando Regex[cite: 32]
+
                     line = line.ToLower();
                     line = Regex.Replace(line, "[^a-z0-9\\s]", " ");
                     
-                    // Separar por espacios
                     string[] words = Regex.Split(line, "\\s+");
 
                     foreach (string word in words)

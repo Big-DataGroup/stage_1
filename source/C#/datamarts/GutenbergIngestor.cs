@@ -15,14 +15,11 @@ public class GutenbergIngestor
 
     public static async Task<bool> DownloadBookAsync(int bookId, string baseOutputDir, string strategy)
     {
-        // Resolve the output directory based on the selected strategy
         string outputDir = ResolveDatalakePath(baseOutputDir, bookId, strategy);
 
-        // Define the file paths using the required nomenclature
         string bodyPath = Path.Combine(outputDir, $"{bookId}.body.txt");
         string headerPath = Path.Combine(outputDir, $"{bookId}.header.txt");
 
-        // Check if files already exist to avoid duplicate network requests (Recovery Mode)
         if (File.Exists(bodyPath) && File.Exists(headerPath))
         {
             Console.WriteLine($"Skipping book {bookId}: Files already exist (Recovery Mode)");
@@ -43,14 +40,12 @@ public class GutenbergIngestor
 
             string text = await response.Content.ReadAsStringAsync();
 
-            // Check if the Gutenberg markers exist in the text
             if (!text.Contains(StartMarker) || !text.Contains(EndMarker))
             {
                 Console.Error.WriteLine($"Book not found or markers missing: {bookId}");
                 return false;
             }
 
-            // Split text to extract header and body
             int startIndex = text.IndexOf(StartMarker, StringComparison.Ordinal);
             string header = text.Substring(0, startIndex);
 
@@ -58,10 +53,8 @@ public class GutenbergIngestor
             int endIndex = text.IndexOf(EndMarker, bodyStartIndex, StringComparison.Ordinal);
             string body = text.Substring(bodyStartIndex, endIndex - bodyStartIndex);
 
-            // Create directories if they do not exist
             Directory.CreateDirectory(outputDir);
 
-            // Write the extracted text into the files
             await File.WriteAllTextAsync(bodyPath, body.Trim());
             await File.WriteAllTextAsync(headerPath, header.Trim());
 
@@ -111,7 +104,6 @@ public class GutenbergIngestor
                 successCount++;
             }
 
-            // Sleep for 200ms between requests to respect rate limits
             await Task.Delay(200);
         }
 

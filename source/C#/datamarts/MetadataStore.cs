@@ -6,7 +6,7 @@ namespace BigDataPipeline.Datamarts
 {
     public class MetadataStore
     {
-        // El formato de la URL en C# para SQLite es 'Data Source='[cite: 31]
+
         private static readonly string DbUrl = "Data Source=../../data/metadata.db";
 
         public static void InitializeDatabase()
@@ -19,10 +19,8 @@ namespace BigDataPipeline.Datamarts
                                       );";
             try
             {
-                // Asegurar que la carpeta existe antes de crear la DB
                 Directory.CreateDirectory("../../data");
 
-                // Equivalente a DriverManager.getConnection en Java[cite: 31]
                 using SqliteConnection conn = new SqliteConnection(DbUrl);
                 conn.Open();
                 
@@ -49,8 +47,7 @@ namespace BigDataPipeline.Datamarts
 
                 using SqliteCommand pstmt = conn.CreateCommand();
                 pstmt.CommandText = insertSql;
-                
-                // En C# se usan parámetros con @ en lugar de ? como en Java[cite: 31]
+
                 pstmt.Parameters.AddWithValue("@id", book.BookId);
                 pstmt.Parameters.AddWithValue("@title", book.Title);
                 pstmt.Parameters.AddWithValue("@author", book.Author);

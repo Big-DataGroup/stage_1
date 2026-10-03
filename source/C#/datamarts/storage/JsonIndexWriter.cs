@@ -16,10 +16,8 @@ namespace BigDataPipeline.Datamarts.Storage
                     Directory.CreateDirectory(directory);
                 }
 
-                // SortedDictionary sustituye a TreeMap para ordenar las claves alfabéticamente[cite: 36]
                 var sorted = new SortedDictionary<string, List<int>>(index);
 
-                // StreamWriter sustituye a BufferedWriter[cite: 36]
                 using StreamWriter writer = new StreamWriter(outputFile);
                 writer.Write("{\n");
                 

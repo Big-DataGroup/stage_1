@@ -20,8 +20,7 @@ namespace BigDataPipeline.Datamarts.Storage
             foreach (var entry in index)
             {
                 string bucket = BucketFor(entry.Key);
-                
-                // Equivalente a computeIfAbsent en Java[cite: 33]
+
                 if (!buckets.ContainsKey(bucket))
                 {
                     buckets[bucket] = new Dictionary<string, List<int>>();
@@ -31,7 +30,6 @@ namespace BigDataPipeline.Datamarts.Storage
 
             foreach (var bucketEntry in buckets)
             {
-                // Path.Combine sustituye a baseDir.resolve(...) de Java[cite: 33]
                 string bucketFile = Path.Combine(_baseDir, bucketEntry.Key, "index.json");
                 JsonIndexWriter.Write(bucketEntry.Value, bucketFile);
             }

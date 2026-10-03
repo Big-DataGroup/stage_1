@@ -6,7 +6,6 @@ namespace BigDataPipeline.Datamarts
 {
     public class InvertedIndex
     {
-        // Equivalente a Map<String, List<Integer>> en Java[cite: 28]
         private readonly Dictionary<string, List<int>> _index;
 
         public InvertedIndex()
@@ -20,7 +19,6 @@ namespace BigDataPipeline.Datamarts
 
             foreach (string word in words)
             {
-                // Equivalente a putIfAbsent de Java[cite: 28]
                 if (!_index.ContainsKey(word))
                 {
                     _index[word] = new List<int>();

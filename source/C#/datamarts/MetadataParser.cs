@@ -12,7 +12,6 @@ namespace BigDataPipeline.Datamarts
             string author = "Unknown";
             string language = "Unknown";
 
-            // Expresiones regulares equivalentes a las de Java[cite: 30]
             Regex titlePattern = new Regex("^Title:\\s+(.*)$");
             Regex authorPattern = new Regex("^Author:\\s+(.*)$");
             Regex langPattern = new Regex("^Language:\\s+(.*)$");
