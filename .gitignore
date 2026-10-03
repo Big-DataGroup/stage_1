@@ -26,11 +26,15 @@ env/
 # Ignorar contenido de datos y bases de datos
 data/datalake/*
 data/control/*
-data/index/*
+data/index/java/*
+data/index/python/*
+data/index/C#/*
 data/*.db
 
 # Mantener los archivos .gitkeep para subir las carpetas vacías
-!data/**/.gitkeep
+!data/index/java/.gitkeep
+!data/index/python/.gitkeep
+!data/index/C#/.gitkeep
 
 # EXCEPCIÓN: SÍ queremos subir los CSVs de benchmarks
 !data/benchmarks/*.csv
