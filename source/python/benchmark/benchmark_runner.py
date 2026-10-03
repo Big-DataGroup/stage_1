@@ -16,7 +16,7 @@ def run_benchmarks():
     csv_file = "../../../data/benchmarks/metricas_python.csv"
 
     results = [["Benchmark", "datasetSize", "Ops/s", "RAM_MB"]]
-    sizes = [1000, 5000]
+    sizes = [500, 1000]
 
     for size in sizes:
         # 1. Creamos un archivo temporal simulando el tamaño del dataset
