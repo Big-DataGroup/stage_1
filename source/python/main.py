@@ -20,8 +20,9 @@ def main():
     MetadataStore.initializeDatabase()
 
     print("=== FASE 1: DESCARGA ===")
+    ingestor = GutenbergIngestor(base_output_dir=datalakeDir)
     for bookId in sampleBooks:
-        success = GutenbergIngestor.downloadBook(bookId, datalakeDir, "by_book")
+        success = ingestor.download_book(bookId, "by_book")
         if success:
             controller.markDownloaded(bookId)
 
