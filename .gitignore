@@ -34,3 +34,6 @@ data/*.db
 
 # EXCEPCIÓN: SÍ queremos subir los CSVs de benchmarks
 !data/benchmarks/*.csv
+
+# Archivos de configuración de vscode
+.vscode/
