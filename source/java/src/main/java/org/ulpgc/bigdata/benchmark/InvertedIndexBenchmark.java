@@ -19,7 +19,7 @@ import java.util.ArrayList;
 @Fork(1)
 public class InvertedIndexBenchmark {
 
-    @Param({"1000", "5000"})
+    @Param({"500", "1000"})
     public int datasetSize;
 
     private String testFilePath;
