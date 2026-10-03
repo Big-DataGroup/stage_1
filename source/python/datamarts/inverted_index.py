@@ -17,7 +17,7 @@ class InvertedIndex:
             # para que podamos hacer el .append() (el equivalente a .add() de Java).
             self.index.setdefault(word, []).append(bookId)
 
-        print(f"Libro {bookId} indexado en memoria correctamente.")
+        #print(f"Libro {bookId} indexado en memoria correctamente.")
 
     # Metodo temporal para ver el contenido en la consola
     def printIndex(self):
