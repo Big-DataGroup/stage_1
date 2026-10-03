@@ -11,13 +11,11 @@ class MetadataParser:
         author = "Unknown"
         language = "Unknown"
 
-        # Expresiones regulares para extraer los campos solicitados
         titlePattern = re.compile(r"^Title:\s+(.*)$")
         authorPattern = re.compile(r"^Author:\s+(.*)$")
         langPattern = re.compile(r"^Language:\s+(.*)$")
 
         try:
-            # En Python usamos 'with' como equivalente al try-with-resources de Java
             with open(filePath, 'r', encoding='utf-8') as br:
                 for line in br:
                     titleMatcher = titlePattern.search(line)
@@ -33,7 +31,6 @@ class MetadataParser:
                         language = langMatcher.group(1).strip()
 
         except IOError as e:
-            # Equivalente a System.err.println
             print(f"Error leyendo la cabecera: {e}", file=sys.stderr)
 
         return BookMetadata(bookId, title, author, language)
