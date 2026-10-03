@@ -10,7 +10,7 @@ namespace InvertedIndexProject
     public class InvertedIndexBenchmark
     {
         // Equivalente a tus @Params de Java (1000 y 5000 elementos)
-        [Params(1000, 5000)]
+        [Params(500, 1000)]
         public int DatasetSize;
 
         private string testFilePath;
