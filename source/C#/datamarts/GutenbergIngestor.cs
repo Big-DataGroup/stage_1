@@ -136,7 +136,7 @@ public class GutenbergIngestor
         foreach (string strategy in strategies)
         {
             Console.WriteLine($"\n-> Executing strategy: {strategy}");
-            await DownloadBatchAsync(sampleBooks, "../datalake", strategy);
+            await DownloadBatchAsync(sampleBooks, "data/datalake", strategy);
         }
     }
 }
