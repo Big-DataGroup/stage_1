@@ -13,7 +13,6 @@ public class MetadataParser {
         String author = "Unknown";
         String language = "Unknown";
 
-        // Expresiones regulares para extraer los campos solicitados[cite: 1]
         Pattern titlePattern = Pattern.compile("^Title:\\s+(.*)$");
         Pattern authorPattern = Pattern.compile("^Author:\\s+(.*)$");
         Pattern langPattern = Pattern.compile("^Language:\\s+(.*)$");

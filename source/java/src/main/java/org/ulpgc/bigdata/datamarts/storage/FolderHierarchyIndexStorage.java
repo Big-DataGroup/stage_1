@@ -5,22 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Arquitectura 3: jerarquía de carpetas.
- * <p>
- * En lugar de un único fichero gigante, se reparte el índice en varios
- * ficheros más pequeños agrupando los términos por su letra inicial:
- * <pre>
- * index/
- *   a/index.json
- *   b/index.json
- *   ...
- *   0-9/index.json   (términos que empiezan por dígito)
- *   misc/index.json  (cualquier otro caso raro)
- * </pre>
- * Esto reduce el tamaño de cada fichero y evita reescribir todo el índice
- * cuando solo cambian unos pocos términos de una letra concreta.
- */
+
 public class FolderHierarchyIndexStorage implements IndexStorage {
 
     private final Path baseDir;

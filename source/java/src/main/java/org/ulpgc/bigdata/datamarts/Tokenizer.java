@@ -14,7 +14,6 @@ public class Tokenizer {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                // Convertir a minusculas y reemplazar_todo lo que no sea letra o numero por espacios
                 line = line.toLowerCase().replaceAll("[^a-z0-9\\s]", " ");
                 String[] words = line.split("\\s+");
 

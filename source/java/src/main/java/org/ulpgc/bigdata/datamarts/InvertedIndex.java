@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class InvertedIndex {
-    // Mapa que asocia un término (String) con una lista de IDs de libros (List<Integer>)
     private final Map<String, List<Integer>> index;
 
     public InvertedIndex() {
@@ -19,15 +18,11 @@ public class InvertedIndex {
         Set<String> words = Tokenizer.tokenize(bodyFilePath);
 
         for (String word : words) {
-            // Si la palabra no existe en el índice, crea una nueva lista vacía
             index.putIfAbsent(word, new ArrayList<>());
-            // Añade el ID del libro a la lista de esa palabra
             index.get(word).add(bookId);
         }
-        //System.out.println("Libro " + bookId + " indexado en memoria correctamente.");
     }
 
-    // Metodo temporal para ver el contenido en la consola
     public void printIndex() {
         for (Map.Entry<String, List<Integer>> entry : index.entrySet()) {
             System.out.println(entry.getKey() + " -> " + entry.getValue());
@@ -40,7 +35,6 @@ public class InvertedIndex {
         }
     }
 
-    // Devuelve los libros donde aparece la palabra, o una lista vacía si no existe
     public List<Integer> search(String word) {
         return index.getOrDefault(word, new ArrayList<>());
     }

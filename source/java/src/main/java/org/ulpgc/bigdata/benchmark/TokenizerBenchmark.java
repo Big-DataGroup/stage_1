@@ -22,14 +22,12 @@ public class TokenizerBenchmark {
     public void setup() throws IOException {
         Path tempFile = Files.createTempFile("benchmark_book", ".txt");
         String dummyContent = "Este es un texto de prueba. Tiene mayusculas, 123 numeros y signos! \n";
-        // Repetimos el texto 10.000 veces para que el Tokenizer tenga que trabajar
         Files.writeString(tempFile, dummyContent.repeat(10000));
         this.testFilePath = tempFile.toAbsolutePath().toString();
     }
 
     @Benchmark
     public void indexingSpeed() {
-        // JMH ejecutará esta línea en bucle para calcular las operaciones por segundo
         Tokenizer.tokenize(testFilePath);
     }
 

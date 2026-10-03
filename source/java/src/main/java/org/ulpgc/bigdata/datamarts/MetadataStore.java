@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 public class MetadataStore {
-    // El archivo de la base de datos se creará automáticamente en la raíz del proyecto
     private static final String DB_URL = "jdbc:sqlite:../../data/metadata.db";
 
     public static void initializeDatabase() {

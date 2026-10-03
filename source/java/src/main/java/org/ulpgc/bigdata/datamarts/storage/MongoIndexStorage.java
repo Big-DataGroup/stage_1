@@ -13,26 +13,7 @@ import java.util.Map;
 
 import static com.mongodb.client.model.Filters.eq;
 
-/**
- * Arquitectura 2: MongoDB.
- * <p>
- * Cada término se guarda como un documento independiente en una colección:
- * <pre>
- * { "_id": "ballena", "books": [1, 84] }
- * </pre>
- * Se usa {@code replaceOne(..., upsert=true)} por término, de forma que si
- * el término ya existía se sobrescribe con la lista de libros actualizada
- * (idempotente: relanzar el proceso no duplica datos).
- * <p>
- * Requiere la dependencia (Maven):
- * <pre>{@code
- * <dependency>
- *   <groupId>org.mongodb</groupId>
- *   <artifactId>mongodb-driver-sync</artifactId>
- *   <version>5.1.0</version>
- * </dependency>
- * }</pre>
- */
+
 public class MongoIndexStorage implements IndexStorage, AutoCloseable {
 
     private final MongoClient client;

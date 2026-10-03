@@ -21,14 +21,11 @@ public class GutenbergIngestor {
             .build();
 
     public static boolean downloadBook(int bookId, String baseOutputDir, String strategy) {
-        // Resolve the output directory based on the selected strategy
         Path outputDir = resolveDatalakePath(Paths.get(baseOutputDir), bookId, strategy);
 
-        // Define the file paths using the required nomenclature
         Path bodyPath = outputDir.resolve(bookId + ".body.txt");
         Path headerPath = outputDir.resolve(bookId + ".header.txt");
 
-        // Check if files already exist to avoid duplicate network requests
         if (Files.exists(bodyPath) && Files.exists(headerPath)) {
             System.out.println("Skipping book " + bookId + ": Files already exist (Recovery Mode)");
             return true;
@@ -51,23 +48,19 @@ public class GutenbergIngestor {
 
             String text = response.body();
 
-            // Check if the Gutenberg markers exist in the text
             if (!text.contains(START_MARKER) || !text.contains(END_MARKER)) {
                 System.err.println("Book not found: " + bookId);
                 return false;
             }
 
-            // Split text to extract header and body
             String[] parts1 = text.split(java.util.regex.Pattern.quote(START_MARKER), 2);
             String header = parts1[0];
 
             String[] parts2 = parts1[1].split(java.util.regex.Pattern.quote(END_MARKER), 2);
             String body = parts2[0];
 
-            // Create directories if they do not exist
             Files.createDirectories(outputDir);
 
-            // Write the extracted text into the files
             Files.writeString(bodyPath, body.strip());
             Files.writeString(headerPath, header.strip());
 
@@ -107,7 +100,6 @@ public class GutenbergIngestor {
         }
     }
 
-    // --- BATCH DOWNLOAD FEATURE ---
     public static void downloadBatch(int[] bookIds, String baseOutputDir, String strategy) {
         System.out.println("=== STARTING BATCH DOWNLOAD ===");
         int successCount = 0;
@@ -118,7 +110,6 @@ public class GutenbergIngestor {
                 successCount++;
             }
 
-            //sleep for 200ms between requests
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
@@ -131,16 +122,14 @@ public class GutenbergIngestor {
     }
 
     public static void main(String[] args) {
-        // Rango ampliado de libros de Project Gutenberg para el análisis de Big Data
         int startId = 1;
-        int endId = 1000; // Puedes ajustarlo según los libros que necesitéis procesar
+        int endId = 1000;
 
         int[] sampleBooks = new int[endId - startId + 1];
         for (int i = 0; i < sampleBooks.length; i++) {
             sampleBooks[i] = startId + i;
         }
 
-        // Nos centramos en la estrategia principal "by_book" de vuestro datalake
         String[] strategies = {"by_book"};
 
         System.out.println("--- Generando Dataset Masivo (" + sampleBooks.length + " libros) ---");
