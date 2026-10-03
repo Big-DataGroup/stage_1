@@ -1,4 +1,4 @@
-package DATALAKE;
+package org.ulpgc.bigdata.datamarts;
 
 import java.io.IOException;
 import java.net.URI;
@@ -131,14 +131,23 @@ public class GutenbergIngestor {
     }
 
     public static void main(String[] args) {
-        int[] sampleBooks = {1342, 84, 11, 2701, 1661};
-        String[] strategies = {"by_book", "by_time", "by_batch"};
+        // Rango ampliado de libros de Project Gutenberg para el análisis de Big Data
+        int startId = 1;
+        int endId = 1000; // Puedes ajustarlo según los libros que necesitéis procesar
 
-        System.out.println("--- Generating Sample Dataset ---");
+        int[] sampleBooks = new int[endId - startId + 1];
+        for (int i = 0; i < sampleBooks.length; i++) {
+            sampleBooks[i] = startId + i;
+        }
+
+        // Nos centramos en la estrategia principal "by_book" de vuestro datalake
+        String[] strategies = {"by_book"};
+
+        System.out.println("--- Generando Dataset Masivo (" + sampleBooks.length + " libros) ---");
 
         for (String strategy : strategies) {
-            System.out.println("\n-> Executing strategy: " + strategy);
-            downloadBatch(sampleBooks, "data/datalake", strategy);
+            System.out.println("\n-> Ejecutando estrategia: " + strategy);
+            downloadBatch(sampleBooks, "../datalake", strategy);
         }
     }
 }
