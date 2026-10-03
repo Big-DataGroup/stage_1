@@ -1,14 +1,29 @@
-# Archivos del sistema e IDE
+# Archivos del sistema, IDEs y Compilados
 .idea/
 *.iml
 target/
+.vs/
+*.user
+*.suo
+
+# C# / .NET / BenchmarkDotNet
+[Bb]in/
+[Oo]bj/
+BenchmarkDotNet.Artifacts/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
 
 # Base de datos y archivos de prueba locales
 *.db
 *.txt
 !README.md
 
-# Ignorar todo el contenido de datos y bases de datos
+# Ignorar contenido de datos y bases de datos
 data/datalake/*
 data/control/*
 data/index/*
@@ -16,3 +31,6 @@ data/*.db
 
 # Mantener los archivos .gitkeep para subir las carpetas vacías
 !data/**/.gitkeep
+
+# EXCEPCIÓN: SÍ queremos subir los CSVs de benchmarks
+!data/benchmarks/*.csv
