@@ -17,4 +17,4 @@ public interface IndexStorage {
      * @param index mapa término -> lista de IDs de libros donde aparece
      */
     void save(Map<String, List<Integer>> index);
-}
+} 

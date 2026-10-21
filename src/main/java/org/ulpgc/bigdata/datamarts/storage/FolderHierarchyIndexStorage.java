@@ -1,25 +1,17 @@
 package org.ulpgc.bigdata.datamarts.storage;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
- * Arquitectura 3: jerarquía de carpetas.
- * <p>
- * En lugar de un único fichero gigante, se reparte el índice en varios
- * ficheros más pequeños agrupando los términos por su letra inicial:
- * <pre>
- * index/
- *   a/index.json
- *   b/index.json
- *   ...
- *   0-9/index.json   (términos que empiezan por dígito)
- *   misc/index.json  (cualquier otro caso raro)
- * </pre>
- * Esto reduce el tamaño de cada fichero y evita reescribir todo el índice
- * cuando solo cambian unos pocos términos de una letra concreta.
+ * Arquitectura 3: Jerarquía de Carpetas (Puntos 3, 10, 27 y 32).
+ * Reparte el índice en subdirectorios por letra inicial (a-z, 0-9, misc).
+ * Mide el tamaño total en bytes del directorio y el número de ficheros generados.
  */
 public class FolderHierarchyIndexStorage implements IndexStorage {
 
@@ -31,6 +23,8 @@ public class FolderHierarchyIndexStorage implements IndexStorage {
 
     @Override
     public void save(Map<String, List<Integer>> index) {
+        long startTime = System.nanoTime();
+
         Map<String, Map<String, List<Integer>>> buckets = new HashMap<>();
 
         for (Map.Entry<String, List<Integer>> entry : index.entrySet()) {
@@ -43,8 +37,28 @@ public class FolderHierarchyIndexStorage implements IndexStorage {
             JsonIndexWriter.write(bucketEntry.getValue(), bucketFile);
         }
 
-        System.out.println("Índice en jerarquía de carpetas escrito bajo " + baseDir
-                + " (" + buckets.size() + " carpetas, " + index.size() + " términos).");
+        long elapsedTime = System.nanoTime() - startTime;
+
+        // Calcular tamaño total y número de ficheros creados en la jerarquía (Punto 27)
+        long totalBytes = 0;
+        int totalFiles = 0;
+        try {
+            if (Files.exists(baseDir)) {
+                try (Stream<Path> walk = Files.walk(baseDir)) {
+                    for (Path p : (Iterable<Path>) walk::iterator) {
+                        if (!Files.isDirectory(p)) {
+                            totalFiles++;
+                            totalBytes += Files.size(p);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error calculando tamaño de la jerarquía de carpetas: " + e.getMessage());
+        }
+
+        System.out.printf("[FolderHierarchyIndexStorage] Hierarchy saved -> Path: %s | Buckets/Files: %d | Total Size: %.2f KB | Time: %.2f ms%n",
+                baseDir, totalFiles, totalBytes / 1024.0, elapsedTime / 1_000_000.0);
     }
 
     private String bucketFor(String term) {
