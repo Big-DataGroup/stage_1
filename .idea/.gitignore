@@ -1,0 +1,17 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Build y targets
+/target/
+/out/
+.gradle/
+*.class
+
+# Datos locales de pruebas y bases de datos
+/metadata.db
+/data/datalake/
+/data/index/
+/data/control/
+/data/benchmarks/*.csv
