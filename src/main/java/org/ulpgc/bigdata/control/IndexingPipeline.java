@@ -41,7 +41,7 @@ public class IndexingPipeline {
         List<IndexStorage> storages = List.of(
                 new JsonFileIndexStorage("data/index/monolithic/index.json"),
                 new FolderHierarchyIndexStorage("data/index/hierarchy"),
-                new MongoIndexStorage("mongodb://localhost:27017", "gutenberg", "inverted_index")
+                //new MongoIndexStorage("mongodb://localhost:27017", "gutenberg", "inverted_index")
         );
 
         // 3. PERSISTIR PRIMERO: Garantiza que si falla la escritura, el control no da por bueno el índice (Punto 44)

@@ -34,9 +34,9 @@ public class JsonFileIndexStorage implements IndexStorage {
             System.err.println("No se pudo calcular el tamaño del fichero monolítico: " + e.getMessage());
         }
 
-        System.out.println("[JsonFileIndexStorage] Monolithic JSON saved -> Path: " + outputFile.toString()
-                + " | Terms: " + index.size()
-                + " | Size: " + String.format("%.2f", fileSizeInBytes / 1024.0) + " KB"
-                + " | Time: " + String.format("%.2f", elapsedTime / 1_000_000.0) + " ms");
+        //System.out.println("[JsonFileIndexStorage] Monolithic JSON saved -> Path: " + outputFile.toString()
+             //   + " | Terms: " + index.size()
+             //   + " | Size: " + String.format("%.2f", fileSizeInBytes / 1024.0) + " KB"
+             //   + " | Time: " + String.format("%.2f", elapsedTime / 1_000_000.0) + " ms");
     }
 }

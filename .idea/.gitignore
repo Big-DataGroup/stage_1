@@ -15,3 +15,28 @@
 /data/index/
 /data/control/
 /data/benchmarks/*.csv
+data/*.db
+
+# C# / .NET
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Java / Maven / IntelliJ
+.idea/
+*.jar
+
+# Python
+**/__pycache__/
+*.pyc
+.pytest_cache/
+
+# Archivos y carpetas de datos/generados
+data/datalake/
+data/index/
+
+data/benchmarks/*.csv
+
+
+BenchmarkDotNet.Artifacts/

@@ -1,5 +1,7 @@
 package org.ulpgc.bigdata.datamarts;
 
+import org.ulpgc.bigdata.datamarts.storage.IndexStorage;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +38,23 @@ public class InvertedIndex {
                 postings.add(bookId);
             }
         }
-        System.out.println("Libro " + bookId + " indexado/actualizado en memoria correctamente.");
+    }
+
+    /**
+     * Busca los IDs de los libros que contienen la palabra consultada.
+     */
+    public List<Integer> search(String word) {
+        return index.getOrDefault(word.toLowerCase(), java.util.Collections.emptyList());
+    }
+
+    /**
+     * Persiste el índice invertido en los almacenes (storages) indicados.
+     */
+    public void persistAll(List<IndexStorage> storages) {
+        if (storages == null) return;
+        for (IndexStorage storage : storages) {
+            storage.save(this);
+        }
     }
 
     /**

@@ -1,20 +1,22 @@
 package org.ulpgc.bigdata.datamarts.storage;
 
+import org.ulpgc.bigdata.datamarts.InvertedIndex;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Estrategia de persistencia para el índice invertido (patrón Strategy).
- * Cada implementación decide CÓMO se guarda físicamente el índice
- * (JSON monolítico, MongoDB, jerarquía de carpetas...), sin que
- * {@code InvertedIndex} tenga que conocer los detalles.
- */
 public interface IndexStorage {
 
     /**
-     * Persiste el índice completo.
-     *
-     * @param index mapa término -> lista de IDs de libros donde aparece
+     * Persiste el mapa término -> lista de IDs de libros.
      */
     void save(Map<String, List<Integer>> index);
-} 
+
+    /**
+     * Método por defecto para guardar directamente a partir de un InvertedIndex.
+     */
+    default void save(InvertedIndex invertedIndex) {
+        if (invertedIndex != null) {
+            save(invertedIndex.getIndex());
+        }
+    }
+}
