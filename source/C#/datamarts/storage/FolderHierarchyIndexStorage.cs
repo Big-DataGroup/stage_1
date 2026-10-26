@@ -8,52 +8,40 @@ namespace BigDataPipeline.Datamarts.Storage
     {
         private readonly string _baseDir;
 
-        public FolderHierarchyIndexStorage(string baseDirPath)
+        public FolderHierarchyIndexStorage(string baseDir)
         {
-            _baseDir = baseDirPath;
+            _baseDir = baseDir;
         }
 
         public void Save(Dictionary<string, List<int>> index)
         {
-            var buckets = new Dictionary<string, Dictionary<string, List<int>>>();
+            int folderCount = 0;
+            Directory.CreateDirectory(_baseDir);
 
             foreach (var entry in index)
             {
-                string bucket = BucketFor(entry.Key);
+                string term = entry.Key;
+                List<int> bookIds = entry.Value;
 
-                if (!buckets.ContainsKey(bucket))
+                // Carpeta según la primera letra (o '_other')
+                char firstChar = char.ToLower(term[0]);
+                string folderName = (firstChar >= 'a' && firstChar <= 'z') ? firstChar.ToString() : "_other";
+                string targetDir = Path.Combine(_baseDir, folderName);
+
+                if (!Directory.Exists(targetDir))
                 {
-                    buckets[bucket] = new Dictionary<string, List<int>>();
+                    Directory.CreateDirectory(targetDir);
+                    folderCount++;
                 }
-                buckets[bucket][entry.Key] = entry.Value;
+
+                string filePath = Path.Combine(targetDir, $"{term}.json");
+
+                // Formato JSON para cada término
+                string jsonContent = $"{{\"{term}\": [{string.Join(", ", bookIds)}]}}";
+                File.WriteAllText(filePath, jsonContent);
             }
 
-            foreach (var bucketEntry in buckets)
-            {
-                string bucketFile = Path.Combine(_baseDir, bucketEntry.Key, "index.json");
-                JsonIndexWriter.Write(bucketEntry.Value, bucketFile);
-            }
-
-            Console.WriteLine($"Índice en jerarquía de carpetas escrito bajo {_baseDir} ({buckets.Count} carpetas, {index.Count} términos).");
-        }
-
-        private string BucketFor(string term)
-        {
-            if (string.IsNullOrEmpty(term))
-            {
-                return "misc";
-            }
-            
-            char c = char.ToLower(term[0]);
-            if (char.IsLetter(c) && c <= 'z' && c >= 'a')
-            {
-                return c.ToString();
-            }
-            if (char.IsDigit(c))
-            {
-                return "0-9";
-            }
-            return "misc";
+            Console.WriteLine($"Índice en jerarquía escrito bajo {_baseDir} ({folderCount} carpetas, {index.Count} términos).");
         }
     }
 }

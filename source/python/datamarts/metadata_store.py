@@ -4,6 +4,7 @@ import sys
 from datamarts.book_metadata import BookMetadata
 
 class MetadataStore:
+    # En Python eliminamos el prefijo "jdbc:sqlite:" y dejamos solo la ruta al archivo
     DB_URL = "../../data/metadata.db"
 
     @staticmethod
@@ -16,6 +17,7 @@ class MetadataStore:
         );"""
 
         try:
+            # 'with' gestiona el cierre automático de la conexión al terminar el bloque
             with sqlite3.connect(MetadataStore.DB_URL) as conn:
                 stmt = conn.cursor()
                 stmt.execute(createTableSQL)
@@ -31,6 +33,8 @@ class MetadataStore:
         try:
             with sqlite3.connect(MetadataStore.DB_URL) as conn:
                 pstmt = conn.cursor()
+                # En lugar de hacer pstmt.setString(), pstmt.setInt()...
+                # en Python pasamos todos los valores directamente en una tupla
                 pstmt.execute(insertSQL, (book.bookId, book.title, book.author, book.language))
                 conn.commit()
                 print(f"Metadatos insertados en SQLite para el libro: {book.bookId}")

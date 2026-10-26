@@ -1,75 +1,71 @@
-﻿using System;
+﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using BigDataPipeline.Control;
+using System.IO;
+using System.Linq;
 using BigDataPipeline.Datamarts;
 using BigDataPipeline.Datamarts.Storage;
 
-namespace BigDataPipeline
+namespace InvertedIndexProject
 {
-    class Program
+    [MemoryDiagnoser]
+    public class InvertedIndexBenchmark
     {
-        static async Task Main(string[] args)
+        [Params(500, 1000)]
+        public int DatasetSize;
+
+        private string testFilePath;
+        private InvertedIndex preFilledIndex;
+        private List<IIndexStorage> storages;
+
+        [GlobalSetup]
+        public void Setup()
         {
-            string datalakeDir = "../../data/datalake";
-            string controlDir = "../../data/control";
-            int[] sampleBooks = { 1332, 322, 31, 2731, 1361 };
+            // 1. Crear dataset temporal de prueba
+            testFilePath = Path.GetTempFileName();
+            string dummyContent = "Prueba de indexacion con palabras repetidas y signos! \n";
+            File.WriteAllText(testFilePath, string.Concat(Enumerable.Repeat(dummyContent, DatasetSize)));
 
-            PipelineController controller = new PipelineController(
-                    $"{controlDir}/downloaded_books.txt",
-                    $"{controlDir}/indexed_books.txt"
-            );
-            
-            MetadataStore.InitializeDatabase(); 
+            // 2. Pre-llenar índice para Query y Disk IO (igual que en Java/Python)
+            preFilledIndex = new InvertedIndex();
+            preFilledIndex.AddDocument(1, testFilePath);
 
-            Console.WriteLine("=== FASE 1: DESCARGA ===");
-            foreach (int bookId in sampleBooks)
+            // 3. Configurar persistencia real para la prueba de disco
+            string tempStorageFile = Path.Combine(Path.GetTempPath(), "benchmark_index.json");
+            storages = new List<IIndexStorage>
             {
-                bool success = await GutenbergIngestor.DownloadBookAsync(bookId, datalakeDir, "by_book");
-                if (success)
-                {
-                    controller.MarkDownloaded(bookId);
-                }
-            }
-
-            Console.WriteLine("\n=== FASE 2: EXTRACCIÓN E INDEXACIÓN ===");
-            List<int> pending = controller.GetBooksPendingIndexing();
-
-            if (pending.Count == 0)
-            {
-                Console.WriteLine("No hay libros pendientes de procesar.");
-                return;
-            }
-
-            InvertedIndex invertedIndex = new InvertedIndex();
-
-            foreach (int bookId in pending)
-            {
-                string basePath = $"{datalakeDir}/by_book/{bookId}/{bookId}";
-                string headerPath = basePath + ".header.txt";
-                string bodyPath = basePath + ".body.txt";
-
-                BookMetadata metadata = MetadataParser.ParseHeader(bookId, headerPath);
-                MetadataStore.InsertMetadata(metadata);
-
-                invertedIndex.AddDocument(bookId, bodyPath);
-                controller.MarkIndexed(bookId);
-            }
-
-            Console.WriteLine("\n=== FASE 3: PERSISTENCIA DEL ÍNDICE ===");
-            
-            
-            List<IIndexStorage> storages = new List<IIndexStorage>
-            {
-                new JsonFileIndexStorage("../../data/index/csharp/monolithic/index.json"),
-                new FolderHierarchyIndexStorage("../../data/index/csharp/hierarchy"),
-                new MongoIndexStorage("mongodb://localhost:27017", "gutenberg", "inverted_index")
+                new JsonFileIndexStorage(tempStorageFile)
             };
+        }
 
-            invertedIndex.PersistAll(storages);
-            
-            
-            Console.WriteLine("\nPipeline Big Data completado con éxito.");
+        [Benchmark]
+        public void UpdatePerformance()
+        {
+            var index = new InvertedIndex();
+            index.AddDocument(999, testFilePath);
+        }
+
+        [Benchmark]
+        public void QueryPerformance()
+        {
+            // Búsqueda en memoria sobre el índice pre-llenado
+            preFilledIndex.Search("indexacion");
+        }
+
+        [Benchmark]
+        public void DiskIoPerformance()
+        {
+            // Persistencia real en disco
+            preFilledIndex.PersistAll(storages);
+        }
+    }
+
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            BenchmarkRunner.Run<InvertedIndexBenchmark>();
         }
     }
 }

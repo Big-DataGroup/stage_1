@@ -23,10 +23,20 @@ namespace BigDataPipeline.Datamarts
                 {
                     _index[word] = new List<int>();
                 }
-                
-                _index[word].Add(bookId);
+
+                // Evitar duplicados si se re-indexa el mismo libro incrementalmente
+                if (!_index[word].Contains(bookId))
+                {
+                    _index[word].Add(bookId);
+                }
             }
-            Console.WriteLine($"Libro {bookId} indexado en memoria correctamente.");
+            //Console.WriteLine($"Libro {bookId} indexado en memoria correctamente.");
+        }
+
+        public List<int> Search(string word)
+        {
+            string key = word.ToLower();
+            return _index.TryGetValue(key, out var list) ? list : new List<int>();
         }
 
         public void PrintIndex()

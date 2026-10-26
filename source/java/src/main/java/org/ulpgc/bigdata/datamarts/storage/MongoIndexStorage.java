@@ -13,7 +13,11 @@ import java.util.Map;
 
 import static com.mongodb.client.model.Filters.eq;
 
-
+/**
+ * Arquitectura 2: MongoDB (Puntos 3, 10 y 32).
+ * Guarda cada término como un documento independiente en una colección con upsert idempotente.
+ * Mide el tiempo de inserción/actualización en la base de datos.
+ */
 public class MongoIndexStorage implements IndexStorage, AutoCloseable {
 
     private final MongoClient client;
@@ -27,6 +31,7 @@ public class MongoIndexStorage implements IndexStorage, AutoCloseable {
 
     @Override
     public void save(Map<String, List<Integer>> index) {
+        long startTime = System.nanoTime();
         ReplaceOptions upsert = new ReplaceOptions().upsert(true);
         int count = 0;
 
@@ -38,8 +43,10 @@ public class MongoIndexStorage implements IndexStorage, AutoCloseable {
             count++;
         }
 
-        System.out.println("Índice persistido en MongoDB (" + count + " términos, colección "
-                + collection.getNamespace() + ").");
+        long elapsedTime = System.nanoTime() - startTime;
+
+        System.out.printf("[MongoIndexStorage] MongoDB persisted -> Collection: %s | Terms Upserted: %d | Time: %.2f ms%n",
+                collection.getNamespace(), count, elapsedTime / 1_000_000.0);
     }
 
     @Override

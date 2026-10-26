@@ -9,31 +9,32 @@ END_MARKER = "*** END OF THE PROJECT GUTENBERG EBOOK"
 
 
 class GutenbergIngestor:
-    def __init__(self, base_output_dir="../datalake"):
-        self.base_output_dir = base_output_dir
 
-    def resolve_datalake_path(self, book_id, strategy):
+    @staticmethod
+    def resolveDatalakePath(base_dir: str, book_id: int, strategy: str) -> str:
         strategy_lower = strategy.lower()
         if strategy_lower == "by_book":
-            return os.path.join(self.base_output_dir, "by_book", str(book_id))
+            return os.path.join(base_dir, "by_book", str(book_id))
         elif strategy_lower == "by_batch":
             lower_bound = (book_id // 1000) * 1000
             upper_bound = lower_bound + 999
             batch_name = f"{lower_bound}-{upper_bound}"
-            return os.path.join(self.base_output_dir, "by_batch", batch_name)
+            return os.path.join(base_dir, "by_batch", batch_name)
         elif strategy_lower == "by_time":
             now = datetime.now()
             date_folder = now.strftime("%Y%m%d")
             hour_folder = now.strftime("%H")
-            return os.path.join(self.base_output_dir, "by_time", date_folder, hour_folder)
+            return os.path.join(base_dir, "by_time", date_folder, hour_folder)
         else:
             raise ValueError(f"Unknown datalake strategy: {strategy}")
 
-    def download_book(self, book_id, strategy):
-        output_dir = self.resolve_datalake_path(book_id, strategy)
+    @staticmethod
+    def downloadBook(book_id: int, base_output_dir: str, strategy: str) -> bool:
+        output_dir = GutenbergIngestor.resolveDatalakePath(base_output_dir, book_id, strategy)
         body_path = os.path.join(output_dir, f"{book_id}.body.txt")
         header_path = os.path.join(output_dir, f"{book_id}.header.txt")
 
+        # Modo recuperación: si ya existen, los salta para evitar peticiones innecesarias
         if os.path.exists(body_path) and os.path.exists(header_path):
             print(f"Skipping book {book_id}: Files already exist (Recovery Mode)")
             return True
@@ -73,12 +74,13 @@ class GutenbergIngestor:
             print(f"Network or disk error while processing the book {book_id}: {e}", file=sys.stderr)
             return False
 
-    def download_batch(self, book_ids, strategy):
+    @staticmethod
+    def downloadBatch(book_ids: list, base_output_dir: str, strategy: str):
         print("=== STARTING BATCH DOWNLOAD (Python) ===")
         success_count = 0
 
         for book_id in book_ids:
-            success = self.download_book(book_id, strategy)
+            success = GutenbergIngestor.downloadBook(book_id, base_output_dir, strategy)
             if success:
                 success_count += 1
 
@@ -95,8 +97,6 @@ if __name__ == "__main__":
 
     print(f"--- Generating Sample Dataset ({len(sample_books)} books) ---")
 
-    ingestor = GutenbergIngestor(base_output_dir="../datalake")
-
     for strategy in strategies:
         print(f"\n-> Executing strategy: {strategy}")
-        ingestor.download_batch(sample_books, strategy)
+        GutenbergIngestor.downloadBatch(sample_books, "../datalake", strategy)

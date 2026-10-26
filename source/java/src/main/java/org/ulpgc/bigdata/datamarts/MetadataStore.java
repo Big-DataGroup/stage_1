@@ -6,7 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 public class MetadataStore {
-    private static final String DB_URL = "jdbc:sqlite:../../data/metadata.db";
+    // El archivo de la base de datos se creará automáticamente en la raíz del proyecto
+    private static final String DB_URL = "jdbc:sqlite:metadata.db";
 
     public static void initializeDatabase() {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS books ("
@@ -26,7 +27,7 @@ public class MetadataStore {
     }
 
     public static void insertMetadata(BookMetadata book) {
-        String insertSQL = "INSERT OR REPLACE INTO books(book_id, title, author, language) VALUES(?,?,?,?)";
+        String insertSQL = "INSERT INTO books(book_id, title, author, language) VALUES(?,?,?,?)";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {

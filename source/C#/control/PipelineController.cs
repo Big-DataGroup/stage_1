@@ -7,30 +7,27 @@ namespace BigDataPipeline.Control
 {
     public class PipelineController
     {
-        private readonly string _downloadedFile;
-        private readonly string _indexedFile;
+        private readonly string downloadedFile;
+        private readonly string indexedFile;
 
-        private readonly HashSet<int> _downloadedBooks;
-        private readonly HashSet<int> _indexedBooks;
-        private readonly object _lockObject = new object();
+        private readonly HashSet<int> downloadedBooks;
+        private readonly HashSet<int> indexedBooks;
+
+        private readonly object _lock = new object();
 
         public PipelineController(string downloadedFilePath, string indexedFilePath)
         {
-            _downloadedFile = downloadedFilePath;
-            _indexedFile = indexedFilePath;
+            this.downloadedFile = downloadedFilePath;
+            this.indexedFile = indexedFilePath;
 
-            _downloadedBooks = LoadIds(_downloadedFile);
-            _indexedBooks = LoadIds(_indexedFile);
+            this.downloadedBooks = loadIds(this.downloadedFile);
+            this.indexedBooks = loadIds(this.indexedFile);
         }
 
-        private HashSet<int> LoadIds(string filePath)
+        private HashSet<int> loadIds(string filePath)
         {
             var ids = new HashSet<int>();
-            
-            if (!File.Exists(filePath))
-            {
-                return ids;
-            }
+            if (!File.Exists(filePath)) return ids;
 
             try
             {
@@ -54,55 +51,43 @@ namespace BigDataPipeline.Control
 
         public void MarkDownloaded(int bookId)
         {
-            lock (_lockObject)
+            lock (_lock)
             {
-                if (_downloadedBooks.Add(bookId))
+                if (downloadedBooks.Add(bookId))
                 {
-                    AppendId(_downloadedFile, bookId);
+                    appendId(downloadedFile, bookId);
                 }
             }
         }
 
         public void MarkIndexed(int bookId)
         {
-            lock (_lockObject)
+            lock (_lock)
             {
-                if (_indexedBooks.Add(bookId))
+                if (indexedBooks.Add(bookId))
                 {
-                    AppendId(_indexedFile, bookId);
+                    appendId(indexedFile, bookId);
                 }
             }
         }
 
-        public bool IsDownloaded(int bookId)
-        {
-            return _downloadedBooks.Contains(bookId);
-        }
+        public bool IsDownloaded(int bookId) => downloadedBooks.Contains(bookId);
 
-        public bool IsIndexed(int bookId)
-        {
-            return _indexedBooks.Contains(bookId);
-        }
+        public bool IsIndexed(int bookId) => indexedBooks.Contains(bookId);
 
         public List<int> GetBooksPendingIndexing()
         {
-            return _downloadedBooks
-                .Where(id => !_indexedBooks.Contains(id))
+            return downloadedBooks
+                .Where(id => !indexedBooks.Contains(id))
                 .OrderBy(id => id)
                 .ToList();
         }
 
-        public IReadOnlySet<int> GetDownloadedBooks()
-        {
-            return _downloadedBooks;
-        }
+        public IReadOnlySet<int> GetDownloadedBooks() => downloadedBooks;
 
-        public IReadOnlySet<int> GetIndexedBooks()
-        {
-            return _indexedBooks;
-        }
+        public IReadOnlySet<int> GetIndexedBooks() => indexedBooks;
 
-        private void AppendId(string filePath, int bookId)
+        private void appendId(string filePath, int bookId)
         {
             try
             {
@@ -111,7 +96,6 @@ namespace BigDataPipeline.Control
                 {
                     Directory.CreateDirectory(directory);
                 }
-
                 File.AppendAllText(filePath, bookId + Environment.NewLine);
             }
             catch (Exception e)
