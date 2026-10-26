@@ -22,6 +22,8 @@ namespace InvertedIndexProject
             {
                 SummaryStyle = BenchmarkDotNet.Reports.SummaryStyle.Default
                     .WithTimeUnit(TimeUnit.Millisecond);
+                
+                AddExporter(BenchmarkDotNet.Exporters.Csv.CsvExporter.Default);
             }
         }
 
@@ -80,7 +82,57 @@ namespace InvertedIndexProject
     {
         public static void Main(string[] args)
         {
-            BenchmarkRunner.Run<InvertedIndexBenchmark>();
+            var summary = BenchmarkRunner.Run<InvertedIndexBenchmark>();
+
+            // --- GENERADOR DIRECTO DE METRICAS CSV ---
+            try
+            {
+                // Buscar la raíz del proyecto localizando la carpeta 'data'
+                string? currentDir = AppContext.BaseDirectory;
+                while (currentDir != null && !Directory.Exists(Path.Combine(currentDir, "data")))
+                {
+                    var parent = Directory.GetParent(currentDir);
+                    currentDir = parent?.FullName;
+                }
+
+                if (currentDir != null)
+                {
+                    string targetDir = Path.Combine(currentDir, "data", "benchmarks");
+                    Directory.CreateDirectory(targetDir);
+                    string targetPath = Path.Combine(targetDir, "metricas_csharp.csv");
+
+                    using (var writer = new StreamWriter(targetPath))
+                    {
+                        // Cabecera clara en milisegundos y bytes
+                        writer.WriteLine("Method;DatasetSize;Mean_ms;Error_ms;StdDev_ms;Allocated_Bytes");
+
+                        foreach (var report in summary.Reports)
+                        {
+                            var method = report.BenchmarkCase.Descriptor.WorkloadMethod.Name;
+                            var datasetSize = report.BenchmarkCase.Parameters["DatasetSize"];
+                            
+                            // Convertir nanosegundos nativos de BenchmarkDotNet a milisegundos (/ 1.000.000)
+                            double meanMs = report.ResultStatistics != null ? report.ResultStatistics.Mean / 1_000_000.0 : 0;
+                            double errorMs = report.ResultStatistics != null ? report.ResultStatistics.StandardError / 1_000_000.0 : 0;
+                            double stdDevMs = report.ResultStatistics != null ? report.ResultStatistics.StandardDeviation / 1_000_000.0 : 0;
+                            
+                            var allocated = report.GcStats.GetBytesAllocatedPerOperation(report.BenchmarkCase);
+
+                            writer.WriteLine($"{method};{datasetSize};{meanMs:F4};{errorMs:F4};{stdDevMs:F4};{allocated}");
+                        }
+                    }
+
+                    Console.WriteLine($"\n[ÉXITO] File CSV generado correctamente en: {targetPath}");
+                }
+                else
+                {
+                    Console.WriteLine("\n[AVISO] No se pudo localizar la carpeta raíz 'data' del proyecto.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\n[ERROR] Fallo al escribir el CSV: {ex.Message}");
+            }
         }
     }
 }
