@@ -53,7 +53,7 @@ public class InvertedIndex {
     public void persistAll(List<IndexStorage> storages) {
         if (storages == null) return;
         for (IndexStorage storage : storages) {
-            storage.save(this);
+            storage.save(this.getIndex());
         }
     }
 

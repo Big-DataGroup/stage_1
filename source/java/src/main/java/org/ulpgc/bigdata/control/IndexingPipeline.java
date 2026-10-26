@@ -40,7 +40,7 @@ public class IndexingPipeline {
         // 2. Definir las tres arquitecturas de almacenamiento evaluadas
         List<IndexStorage> storages = List.of(
                 new JsonFileIndexStorage("data/index/monolithic/index.json"),
-                new FolderHierarchyIndexStorage("data/index/hierarchy"),
+                new FolderHierarchyIndexStorage("data/index/hierarchy")
                 //new MongoIndexStorage("mongodb://localhost:27017", "gutenberg", "inverted_index")
         );
 

@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 
-@BenchmarkMode(Mode.Throughput)
-@OutputTimeUnit(TimeUnit.SECONDS)
+@BenchmarkMode(Mode.AverageTime) // Cambiado a AverageTime para medir el tiempo real
+@OutputTimeUnit(TimeUnit.MILLISECONDS) // Cambiado a milisegundos
 @State(Scope.Thread)
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
@@ -37,17 +37,20 @@ public class InvertedIndexBenchmark {
         preFilledIndex.addDocument(1, testFilePath);
 
         storages = new ArrayList<>();
+        // TODO: ¡Esta lista está vacía! Para medir el disco real, debes añadir tu clase de Storage:
+        // storages.add(new FileIndexStorage("ruta/destino.txt"));
     }
 
     @Benchmark
-    public void updatePerformance() {
+    public InvertedIndex updatePerformance() {
         InvertedIndex index = new InvertedIndex();
         index.addDocument(999, testFilePath);
+        return index; // <-- SOLUCIÓN: Devolver el objeto evita que Java elimine el código
     }
 
     @Benchmark
-    public void queryPerformance() {
-        preFilledIndex.search("indexacion");
+    public List<Integer> queryPerformance() {
+        return preFilledIndex.search("indexacion"); // <-- SOLUCIÓN: Devolver el resultado de la búsqueda
     }
 
     @Benchmark
