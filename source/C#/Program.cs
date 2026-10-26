@@ -103,22 +103,24 @@ namespace InvertedIndexProject
 
                     using (var writer = new StreamWriter(targetPath))
                     {
-                        // Cabecera clara en milisegundos y bytes
-                        writer.WriteLine("Method;DatasetSize;Mean_ms;Error_ms;StdDev_ms;Allocated_Bytes");
+                        // Cabecera separada por COMAS (lo que GitHub espera)
+                        writer.WriteLine("Method,DatasetSize,Mean_ms,Error_ms,StdDev_ms,Allocated_Bytes");
 
                         foreach (var report in summary.Reports)
                         {
                             var method = report.BenchmarkCase.Descriptor.WorkloadMethod.Name;
                             var datasetSize = report.BenchmarkCase.Parameters["DatasetSize"];
                             
-                            // Convertir nanosegundos nativos de BenchmarkDotNet a milisegundos (/ 1.000.000)
                             double meanMs = report.ResultStatistics != null ? report.ResultStatistics.Mean / 1_000_000.0 : 0;
                             double errorMs = report.ResultStatistics != null ? report.ResultStatistics.StandardError / 1_000_000.0 : 0;
                             double stdDevMs = report.ResultStatistics != null ? report.ResultStatistics.StandardDeviation / 1_000_000.0 : 0;
                             
                             var allocated = report.GcStats.GetBytesAllocatedPerOperation(report.BenchmarkCase);
 
-                            writer.WriteLine($"{method};{datasetSize};{meanMs:F4};{errorMs:F4};{stdDevMs:F4};{allocated}");
+                            // FormattableString.Invariant fuerza que los decimales usen PUNTO en vez de COMA
+                            writer.WriteLine(System.FormattableString.Invariant(
+                                $"{method},{datasetSize},{meanMs:F4},{errorMs:F4},{stdDevMs:F4},{allocated}"
+                            ));
                         }
                     }
 

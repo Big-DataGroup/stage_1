@@ -1,7 +1,7 @@
-Method;DatasetSize;Mean_ms;Error_ms;StdDev_ms;Allocated_Bytes
-UpdatePerformance;500;0,8218;0,0014;0,0052;574036
-QueryPerformance;500;0,0000;0,0000;0,0000;0
-DiskIoPerformance;500;0,2514;0,0012;0,0050;7753
-UpdatePerformance;1000;1,4335;0,0019;0,0070;1138080
-QueryPerformance;1000;0,0000;0,0000;0,0000;0
-DiskIoPerformance;1000;0,2747;0,0014;0,0063;7753
+Method,DatasetSize,Mean_ms,Error_ms,StdDev_ms,Allocated_Bytes
+UpdatePerformance,500,0.8102,0.0015,0.0054,574036
+QueryPerformance,500,0.0000,0.0000,0.0000,0
+DiskIoPerformance,500,0.2774,0.0013,0.0053,7753
+UpdatePerformance,1000,1.4969,0.0049,0.0190,1138080
+QueryPerformance,1000,0.0000,0.0000,0.0000,0
+DiskIoPerformance,1000,0.2749,0.0014,0.0068,7753
