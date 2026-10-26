@@ -41,3 +41,6 @@ data/*.db
 
 # Archivos de configuración de vscode
 .vscode/
+
+# Archivos .pdf
+*.pdf
