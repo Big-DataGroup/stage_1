@@ -36,7 +36,7 @@ cd stage_1
 Executes the inverted index building and benchmarking process in Python
 ```bash
 cd source/python
-pip install requests
+pip install requests pymongo pandas
 python main.py
 ```
 ### 3. Java Execution
@@ -58,7 +58,12 @@ dotnet run
 Each language module generates its own performance metrics after completing the inverted index generation. These metrics are consolidated into a single file located at:
 data/benchmarks/unified_metrics.csv
 
-This file contains the comparative analysis of execution times and resource consumption across Python, Java, and C#.
+The benchmark keeps the existing update, query, and disk-I/O measurements and now runs them on the same corpus for every combination of:
+
+* Datalake layout: `by_book`, `by_batch`, and `by_time`
+* Index: `json_monolithic`, `mongodb`, and `folders`
+
+MongoDB benchmarks use `MONGO_URI` and `MONGO_DATABASE` when defined, falling back to `mongodb://localhost:27017` and `gutenberg_benchmark`.
 
 ## 👥 Contributors
 * **Alejandro Morales Monroy**

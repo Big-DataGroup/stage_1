@@ -30,6 +30,12 @@ namespace InvertedIndexProject
         [Params(500, 1000)]
         public int DatasetSize;
 
+        [Params("by_book", "by_batch", "by_time")]
+        public string Layout { get; set; }
+
+        [Params("json_monolithic", "mongodb", "folders")]
+        public string Index { get; set; }
+
         private string testFilePath;
         private InvertedIndex preFilledIndex;
         private List<IIndexStorage> storages;
@@ -38,7 +44,16 @@ namespace InvertedIndexProject
         public void Setup()
         {
             // 1. Crear dataset temporal de prueba
-            testFilePath = Path.GetTempFileName();
+            string datalake = Path.Combine(Path.GetTempPath(), "benchmark_datalake");
+            string layoutDirectory = Layout switch
+            {
+                "by_book" => Path.Combine(datalake, "by_book", "999"),
+                "by_batch" => Path.Combine(datalake, "by_batch", "0-999"),
+                "by_time" => Path.Combine(datalake, "by_time", "benchmark-date", "00"),
+                _ => throw new ArgumentException($"Unknown layout: {Layout}")
+            };
+            Directory.CreateDirectory(layoutDirectory);
+            testFilePath = Path.Combine(layoutDirectory, "999.body.txt");
             string dummyContent = "Prueba de indexacion con palabras repetidas y signos! \n";
             File.WriteAllText(testFilePath, string.Concat(Enumerable.Repeat(dummyContent, DatasetSize)));
 
@@ -47,11 +62,28 @@ namespace InvertedIndexProject
             preFilledIndex.AddDocument(1, testFilePath);
 
             // 3. Configurar persistencia real para la prueba de disco
-            string tempStorageFile = Path.Combine(Path.GetTempPath(), "benchmark_index.json");
             storages = new List<IIndexStorage>
             {
-                new JsonFileIndexStorage(tempStorageFile)
             };
+            switch (Index)
+            {
+                case "json_monolithic":
+                    storages.Add(new JsonFileIndexStorage(
+                        Path.Combine(Path.GetTempPath(), $"benchmark_{Layout}_{DatasetSize}.json")));
+                    break;
+                case "folders":
+                    storages.Add(new FolderHierarchyIndexStorage(
+                        Path.Combine(Path.GetTempPath(), $"benchmark_{Layout}_{DatasetSize}")));
+                    break;
+                case "mongodb":
+                    storages.Add(new MongoIndexStorage(
+                        Environment.GetEnvironmentVariable("MONGO_URI") ?? "mongodb://localhost:27017",
+                        Environment.GetEnvironmentVariable("MONGO_DATABASE") ?? "gutenberg_benchmark",
+                        $"csharp_{Layout}_{DatasetSize}"));
+                    break;
+                default:
+                    throw new ArgumentException($"Unknown index: {Index}");
+            }
         }
 
         [Benchmark]
@@ -104,12 +136,14 @@ namespace InvertedIndexProject
                     using (var writer = new StreamWriter(targetPath))
                     {
                         // Cabecera separada por COMAS (lo que GitHub espera)
-                        writer.WriteLine("Method,DatasetSize,Mean_ms,Error_ms,StdDev_ms,Allocated_Bytes");
+                        writer.WriteLine("Method,DatasetSize,Layout,Index,Mean_ms,Error_ms,StdDev_ms,Allocated_Bytes");
 
                         foreach (var report in summary.Reports)
                         {
                             var method = report.BenchmarkCase.Descriptor.WorkloadMethod.Name;
                             var datasetSize = report.BenchmarkCase.Parameters["DatasetSize"];
+                            var layout = report.BenchmarkCase.Parameters["Layout"];
+                            var index = report.BenchmarkCase.Parameters["Index"];
                             
                             double meanMs = report.ResultStatistics != null ? report.ResultStatistics.Mean / 1_000_000.0 : 0;
                             double errorMs = report.ResultStatistics != null ? report.ResultStatistics.StandardError / 1_000_000.0 : 0;
@@ -119,7 +153,7 @@ namespace InvertedIndexProject
 
                             // FormattableString.Invariant fuerza que los decimales usen PUNTO en vez de COMA
                             writer.WriteLine(System.FormattableString.Invariant(
-                                $"{method},{datasetSize},{meanMs:F4},{errorMs:F4},{stdDevMs:F4},{allocated}"
+                                $"{method},{datasetSize},{layout},{index},{meanMs:F8},{errorMs:F8},{stdDevMs:F8},{allocated}"
                             ));
                         }
                     }

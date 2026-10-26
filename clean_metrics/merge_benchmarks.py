@@ -11,12 +11,17 @@ def clean_csharp_benchmark(file_path):
 
     if 'Mean_ms' in df.columns:
         # Formato NUEVO (generado con nuestro StreamWriter)
-        df_clean = df[['Method', 'DatasetSize', 'Mean_ms', 'Allocated_Bytes']].copy()
+        for column, default in (('Layout', 'by_book'), ('Index', 'json_monolithic')):
+            if column not in df.columns:
+                df[column] = default
+        df_clean = df[['Method', 'DatasetSize', 'Layout', 'Index', 'Mean_ms', 'Allocated_Bytes']].copy()
         df_clean.rename(columns={'Method': 'Operation', 'Mean_ms': 'Time_ms'}, inplace=True)
         df_clean['Memory_MB'] = df_clean['Allocated_Bytes'] / (1024 * 1024)
     else:
         # Formato VIEJO (si sigue leyendo el archivo fantasma antiguo)
         df_clean = df[['Method', 'DatasetSize', 'Mean', 'Allocated']].copy()
+        df_clean['Layout'] = 'by_book'
+        df_clean['Index'] = 'json_monolithic'
         df_clean.rename(columns={'Method': 'Operation'}, inplace=True)
         df_clean['Time_ms'] = df_clean['Mean'].apply(
             lambda x: float(str(x).replace(',', '').replace(' ns', '')) / 1_000_000 if 'ns' in str(x) else 0.0
@@ -26,15 +31,19 @@ def clean_csharp_benchmark(file_path):
         )
 
     df_clean['Language'] = 'C#'
-    return df_clean[['Language', 'Operation', 'DatasetSize', 'Time_ms', 'Memory_MB']]
+    return df_clean[['Language', 'Operation', 'DatasetSize', 'Layout', 'Index', 'Time_ms', 'Memory_MB']]
 
 
 def clean_java_benchmark(file_path):
     df = pd.read_csv(file_path, sep=',')
-    df_clean = df[['Benchmark', 'Mode', 'Param: datasetSize', 'Score', 'Unit']].copy()
+    for column, default in (('Param: layout', 'by_book'), ('Param: index', 'json_monolithic')):
+        if column not in df.columns:
+            df[column] = default
+    df_clean = df[['Benchmark', 'Mode', 'Param: datasetSize', 'Param: layout', 'Param: index', 'Score', 'Unit']].copy()
     df_clean['Language'] = 'Java'
     df_clean['Raw_Operation'] = df_clean['Benchmark'].apply(lambda x: str(x).split('.')[-1])
     df_clean.rename(columns={'Param: datasetSize': 'DatasetSize'}, inplace=True)
+    df_clean.rename(columns={'Param: layout': 'Layout', 'Param: index': 'Index'}, inplace=True)
 
     def extract_ms(row):
         score = float(str(row['Score']).replace(',', '.'))
@@ -50,18 +59,21 @@ def clean_java_benchmark(file_path):
 
     df_clean['Time_ms'] = df_clean.apply(extract_ms, axis=1)
     df_clean['Memory_MB'] = 0.0  # Java no tiene memoria en el CSV base
-    return df_clean[['Language', 'Raw_Operation', 'DatasetSize', 'Time_ms', 'Memory_MB']].rename(
+    return df_clean[['Language', 'Raw_Operation', 'DatasetSize', 'Layout', 'Index', 'Time_ms', 'Memory_MB']].rename(
         columns={'Raw_Operation': 'Operation'})
 
 
 def clean_python_benchmark(file_path):
     df = pd.read_csv(file_path, sep=',')
-    df_clean = df[['Benchmark', 'datasetSize', 'Ops/s', 'RAM_MB']].copy()
+    for column, default in (('Layout', 'by_book'), ('Index', 'json_monolithic')):
+        if column not in df.columns:
+            df[column] = default
+    df_clean = df[['Benchmark', 'datasetSize', 'Layout', 'Index', 'Ops/s', 'RAM_MB']].copy()
     df_clean.rename(columns={'Benchmark': 'Operation', 'datasetSize': 'DatasetSize', 'RAM_MB': 'Memory_MB'},
                     inplace=True)
     df_clean['Language'] = 'Python'
     df_clean['Time_ms'] = df_clean['Ops/s'].apply(lambda x: 1000.0 / float(x) if pd.notna(x) and float(x) > 0 else 0.0)
-    return df_clean[['Language', 'Operation', 'DatasetSize', 'Time_ms', 'Memory_MB']]
+    return df_clean[['Language', 'Operation', 'DatasetSize', 'Layout', 'Index', 'Time_ms', 'Memory_MB']]
 
 
 if __name__ == "__main__":
@@ -84,22 +96,22 @@ if __name__ == "__main__":
     dataframes = []
 
     if os.path.exists(ruta_csharp):
-        print("✅ Encontrado C#")
+        print("[OK] Encontrado C#")
         dataframes.append(clean_csharp_benchmark(ruta_csharp))
     else:
-        print("❌ Faltó C#")
+        print("[FALTA] C#")
 
     if os.path.exists(ruta_java):
-        print("✅ Encontrado Java")
+        print("[OK] Encontrado Java")
         dataframes.append(clean_java_benchmark(ruta_java))
     else:
-        print("❌ Faltó Java")
+        print("[FALTA] Java")
 
     if os.path.exists(ruta_python):
-        print("✅ Encontrado Python")
+        print("[OK] Encontrado Python")
         dataframes.append(clean_python_benchmark(ruta_python))
     else:
-        print("❌ Faltó Python")
+        print("[FALTA] Python")
 
     if dataframes:
         df_final = pd.concat(dataframes, ignore_index=True)
@@ -121,16 +133,16 @@ if __name__ == "__main__":
         df_final['DatasetSize'] = df_final['DatasetSize'].astype(int)
 
         # 2. Redondeo de métricas
-        df_final['Time_ms'] = df_final['Time_ms'].round(6)
+        df_final['Time_ms'] = df_final['Time_ms'].round(8)
         df_final['Memory_MB'] = df_final['Memory_MB'].round(4)
 
         ruta_salida = os.path.join(script_dir, "unified_metrics.csv")
 
         # 3. Exportación: float_format solo afectará a Time_ms y Memory_MB
-        df_final.to_csv(ruta_salida, index=False, float_format='%.6f')
+        df_final.to_csv(ruta_salida, index=False, float_format='%.8f')
 
         print("\n--- TABLA FINAL UNIFICADA ---")
-        pd.options.display.float_format = '{:.6f}'.format
+        pd.options.display.float_format = '{:.8f}'.format
         print(df_final.to_string(index=False))
 
         print(f"\n[ÉXITO] Archivo maestro unificado guardado en: {ruta_salida}")
